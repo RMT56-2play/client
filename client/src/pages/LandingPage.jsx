@@ -9,7 +9,7 @@ export default function LandingPage() {
           <div className="flex flex-col items-center space-y-4">
             <NavLink to="/createGame" className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-full w-64 text-center">Create Game</NavLink>
             <NavLink to="/joinGame" className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-full w-64 text-center">Join Game</NavLink>
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-full w-64 text-center">How to Play</button>
+            <NavLink to="/howtoplay" className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-full w-64 text-center">How to Play</NavLink>
           </div>
       </div>
       </Background>
