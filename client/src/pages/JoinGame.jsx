@@ -1,39 +1,16 @@
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import Background from "../components/Background";
-import axios from "../config/axiosInstance";
-import Swal from "sweetalert2";
 
 export default function JoinGame() {
   const navigate = useNavigate();
-  const [gameList, setGameList] = useState([]);
 
   const handleBack = () => {
     navigate("/");
   };
 
-  async function fecthGameList() {
-    try {
-      const { data } = await axios({
-        method: "post",
-        url: "/joingame",
-        headers: {
-          Authorization: `Bearer ${localStorage.access_token}`,
-        },
-      });
-      setGameList(data);
-    } catch (error) {
-      Swal.fire({
-        title: "Error",
-        text: error.response.data.message,
-        icon: "error",
-      });
-    }
-  }
-
-  useEffect(() => {
-    fecthGameList();
-  }, []);
+  const handleSubmit = () => {
+    navigate("/waiting");
+  };
 
 
   return (
@@ -77,6 +54,7 @@ export default function JoinGame() {
 
             <div className="flex justify-center">
               <button
+                onClick={handleSubmit}
                 className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-full w-64"
               >
                 Join Game
