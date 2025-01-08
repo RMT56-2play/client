@@ -26,12 +26,12 @@ export default function PlayPage() {
           </div>
           <div className="grid grid-cols-2 gap-2">
             {dummyImages.map((image, index) => (
-              <button
+              <div
                 key={index}
-                className="bg-white p-4 rounded-lg shadow hover:bg-gray-200 text-2xl"
+                className="bg-white p-4 rounded-lg text-center shadow text-2xl"
               >
                 {image}
-              </button>
+              </div>
             ))}
           </div>
         </div>
