@@ -45,7 +45,7 @@ export default function HowToPlay() {
             </p>
           </div>
         </div>
-        {/* Tombol Back */}
+        {/* Back */}
         <div className="absolute bottom-[4%] w-full flex justify-center">
           <button
             onClick={handleBack}
