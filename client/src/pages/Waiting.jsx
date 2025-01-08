@@ -1,15 +1,42 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import waitingPageBackground from "../assets/waitingRoom.png";
 import Background from "../components/Background";
+import axios from "../config/axiosInstance";
+import Swal from "sweetalert2";
 
 export default function Waiting() {
   const navigate = useNavigate();  
+  const [gameName, setGameName] = useState([]); 
 
   const handleSubmit = (e) => {
     e.preventDefault();
     navigate("/scoreboard");
   
   };
+
+  async function fecthGameName() {
+    try {
+      const { data } = await axios({
+        method: "get",
+        url: "/startgame",
+        headers: {
+          Authorization: `Bearer ${localStorage.access_token}`,
+        },
+      });
+      setGameName(data);
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: error.response.data.message,
+        icon: "error",
+      });
+    }
+  }
+
+  useEffect(() => {
+    fecthGameName();
+  }, []);
   
     return (
       <Background backgroundImage={waitingPageBackground}>
