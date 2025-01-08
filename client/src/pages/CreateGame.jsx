@@ -1,18 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Background from "../components/Background";
 import { useNavigate } from "react-router";
+import axios from "../config/axiosInstance";
+import Swal from "sweetalert2";
 
 export default function CreateGame() {
   const navigate = useNavigate();
+  const [gameName, setGameName] = useState([]); 
 
     const handleBack = () => {
       navigate("/");  
     };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    navigate("/waiting");
-  };
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      navigate("/waiting");
+    };
+
+    async function fecthGameName() {
+      try {
+        const { data } = await axios({
+          method: "post",
+          url: "/creategame",
+          headers: {
+            Authorization: `Bearer ${localStorage.access_token}`,
+          },
+        });
+        setGameName(data);
+      } catch (error) {
+        Swal.fire({
+          title: "Error",
+          text: error.response.data.message,
+          icon: "error",
+        });
+      }
+    }
+
+    useEffect(() => {
+      fecthGameName();
+    }, []);
 
   return (
     <Background>
