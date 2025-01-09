@@ -6,6 +6,9 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import { io } from "socket.io-client";
+const socket = io("http://localhost:3000");
+
 export default function CreateGame() {
   const [username, setUsername] = useState("");
   const navigate = useNavigate();
@@ -21,6 +24,9 @@ export default function CreateGame() {
       localStorage.setItem("gameId", response.data.game.id);
       localStorage.setItem("userId", response.data.user.id);
       localStorage.setItem("username", response.data.user.username);
+
+      socket.emit("joinWaitingRoom", response.data.game.id);
+
       toast.success("Game created successfully", {
         autoClose: 300,
       });

@@ -7,6 +7,9 @@ import { useEffect, useState } from "react";
 
 import { toast } from "react-toastify";
 
+import { io } from "socket.io-client";
+const socket = io("http://localhost:3000");
+
 export default function Scoreboard() {
   const [scoreBoard, setScoreBoard] = useState([]);
   const navigate = useNavigate();
@@ -15,28 +18,61 @@ export default function Scoreboard() {
     navigate("/");
   };
 
-  const fetchScoreBoard = async () => {
-    try {
-      const response = await p2Api.get("/getscoreboard", {
-        params: {
-          gameId: localStorage.getItem("gameId"),
-        },
-      });
-      console.log(response.data.players);
-      setScoreBoard(
-        [...response.data.players].sort((a, b) => b.score - a.score)
-      );
-      // console.log(scoreBoard);
-      toast.success("Game has ended", {
-        autoClose: 300,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const fetchScoreBoard = async () => {
+  //   try {
+  //     const response = await p2Api.get("/getscoreboard", {
+  //       params: {
+  //         gameId: localStorage.getItem("gameId"),
+  //       },
+  //     });
+  //     console.log(response.data.players);
+  //     setScoreBoard(
+  //       [...response.data.players].sort((a, b) => b.score - a.score)
+  //     );
+  //     // console.log(scoreBoard);
+  //     toast.success("Game has ended", {
+  //       autoClose: 300,
+  //     });
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchScoreBoard();
+  // }, []);
 
   useEffect(() => {
+    const gameId = localStorage.getItem("gameId");
+    socket.emit("joinGameRoom", gameId);
+
+    const fetchScoreBoard = async () => {
+      try {
+        const response = await p2Api.get("/getscoreboard", {
+          params: { gameId },
+        });
+        const sortedPlayers = [...response.data.players].sort(
+          (a, b) => b.score - a.score
+        );
+        setScoreBoard(sortedPlayers);
+      } catch (error) {
+        console.log(error);
+        toast.error("Error fetching scoreboard", {
+          autoClose: 300,
+        });
+      }
+    };
+
     fetchScoreBoard();
+
+    socket.on("scoreboardUpdate", (data) => {
+      const sortedPlayers = [...data.players].sort((a, b) => b.score - a.score);
+      setScoreBoard(sortedPlayers);
+    });
+
+    return () => {
+      socket.off("scoreboardUpdate");
+    };
   }, []);
 
   return (

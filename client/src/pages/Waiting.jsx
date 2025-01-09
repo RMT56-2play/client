@@ -6,44 +6,89 @@ import { useEffect, useState } from "react";
 import { p2Api } from "../helpers/http-client";
 import { toast } from "react-toastify";
 
+import { io } from "socket.io-client";
+const socket = io("http://localhost:3000");
+
 export default function Waiting() {
   const [players, setPlayers] = useState([]);
 
   const navigate = useNavigate();
 
-  const fetchPlayers = async () => {
-    try {
-      const gameId = localStorage.getItem("gameId");
-      // console.log(gameId);
-      const response = await p2Api.get(`/waitplayer/`, { params: { gameId } });
-      // console.log(response.data);
-      setPlayers(response.data.players);
-    } catch (error) {
-      console.log(error);
-      toast.error("Error fetching players");
-    }
-  };
+  // const fetchPlayers = async () => {
+  //   try {
+  //     const gameId = localStorage.getItem("gameId");
+  //     // console.log(gameId);
+  //     const response = await p2Api.get(`/waitplayer/`, { params: { gameId } });
+  //     // console.log(response.data);
+  //     setPlayers(response.data.players);
+  //   } catch (error) {
+  //     console.log(error);
+  //     toast.error("Error fetching players");
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchPlayers();
+  // }, []);
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const gameId = localStorage.getItem("gameId");
+  //     const response = await p2Api.get("/startgame", { params: { gameId } });
+  //     console.log(response.data);
+  //     navigate("/playPage");
+  //     toast.success("Game start", {
+  //       autoClose: 300,
+  //     });
+  //   } catch (error) {
+  //     console.log(error);
+  //     toast.error(error.response.data.message, {
+  //       autoClose: 300,
+  //     });
+  //   }
+  // };
 
   useEffect(() => {
-    fetchPlayers();
-  }, []);
+    const gameId = localStorage.getItem("gameId");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const gameId = localStorage.getItem("gameId");
-      const response = await p2Api.get("/startgame", { params: { gameId } });
-      console.log(response.data);
+    socket.emit("joinWaitingRoom", gameId);
+
+    // const fetchPlayers = async () => {
+    //   try {
+    //     const gameId = localStorage.getItem("gameId");
+    //     // console.log(gameId);
+    //     const response = await p2Api.get(`/waitplayer/`, {
+    //       params: { gameId },
+    //     });
+    //     // console.log(response.data);
+    //     setPlayers(response.data.players);
+    //   } catch (error) {
+    //     console.log(error);
+    //     toast.error("Error fetching players");
+    //   }
+    // };
+
+    // fetchPlayers();
+
+    socket.on("playerListUpdate", (data) => {
+      setPlayers(data.players);
+    });
+
+    socket.on("gameStart", (gameState) => {
       navigate("/playPage");
-      toast.success("Game start", {
-        autoClose: 300,
-      });
-    } catch (error) {
-      console.log(error);
-      toast.error(error.response.data.message, {
-        autoClose: 300,
-      });
-    }
+    });
+
+    return () => {
+      socket.off("playerListUpdate");
+      socket.off("gameStart");
+    };
+  }, [navigate]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const gameId = localStorage.getItem("gameId");
+    socket.emit("startGame", gameId);
   };
 
   return (
@@ -52,6 +97,14 @@ export default function Waiting() {
         <h1 className="text-4xl font-bold text-white text-center mb-6">
           Waiting for Players
         </h1>
+        <div className="flex justify-center mb-4">
+          <img
+            src="https://media.tenor.com/wpSo-8CrXqUAAAAi/loading-loading-forever.gif"
+            alt="Loading"
+            className="w-12 h-12"
+          />
+        </div>
+
         <p className="text-white text-center mb-8">
           Share this Game ID: {localStorage.getItem("gameId")}
         </p>

@@ -7,6 +7,9 @@ import { useCallback, useEffect, useState } from "react";
 
 import { toast } from "react-toastify";
 
+import { io } from "socket.io-client";
+const socket = io("http://localhost:3000");
+
 export default function PlayPage() {
   const [playerImages, setPlayerImages] = useState([]);
   const [deckImages, setDeckImages] = useState([]);
@@ -74,95 +77,159 @@ export default function PlayPage() {
     { name: "zebra", img: "/zebra.png" },
   ];
 
-  const fetchPlayerCard = async () => {
-    try {
-      const response = await p2Api.get("/getplayercards", {
-        params: {
-          userId: localStorage.getItem("userId"),
-          gameId: localStorage.getItem("gameId"),
-        },
-      });
-      console.log(response.data);
-      const playerTopCard = response.data.playerCards[0];
-      // const playerCardImages = playerTopCard.map(
-      //   (card) => imageSpotIt[card].img
-      // );
-      setPlayerImages(playerTopCard);
-    } catch (error) {
-      console.log(error);
-      toast.error("Error fetching cards", {
-        autoClose: 300,
-      });
-    }
-  };
+  // const fetchPlayerCard = async () => {
+  //   try {
+  //     const response = await p2Api.get("/getplayercards", {
+  //       params: {
+  //         userId: localStorage.getItem("userId"),
+  //         gameId: localStorage.getItem("gameId"),
+  //       },
+  //     });
+  //     console.log(response.data);
+  //     const playerTopCard = response.data.playerCards[0];
+  //     // const playerCardImages = playerTopCard.map(
+  //     //   (card) => imageSpotIt[card].img
+  //     // );
+  //     setPlayerImages(playerTopCard);
+  //   } catch (error) {
+  //     console.log(error);
+  //     toast.error("Error fetching cards", {
+  //       autoClose: 300,
+  //     });
+  //   }
+  // };
 
-  const fetchDeckCard = async () => {
-    try {
-      const response = await p2Api.get("/getdeckcards", {
-        params: {
-          gameId: localStorage.getItem("gameId"),
-        },
-      });
-      console.log(response.data);
-      const deckTopCard = response.data.deckCards[0];
-      // const deckCardImages = deckTopCard.map((card) => imageSpotIt[card].img);
-      setDeckImages(deckTopCard);
-    } catch (error) {
-      console.log(error);
-      toast.error("Error fetching cards", {
-        autoClose: 300,
-      });
-    }
-  };
+  // const fetchDeckCard = async () => {
+  //   try {
+  //     const response = await p2Api.get("/getdeckcards", {
+  //       params: {
+  //         gameId: localStorage.getItem("gameId"),
+  //       },
+  //     });
+  //     console.log(response.data);
+  //     const deckTopCard = response.data.deckCards[0];
+  //     // const deckCardImages = deckTopCard.map((card) => imageSpotIt[card].img);
+  //     setDeckImages(deckTopCard);
+  //   } catch (error) {
+  //     console.log(error);
+  //     toast.error("Error fetching cards", {
+  //       autoClose: 300,
+  //     });
+  //   }
+  // };
 
-  const fetchScoreBoard = async () => {
-    try {
-      const response = await p2Api.get("/getscoreboard", {
-        params: {
-          gameId: localStorage.getItem("gameId"),
-        },
-      });
-      console.log(response.data.players);
-      setScoreBoard(response.data.players);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const fetchScoreBoard = async () => {
+  //   try {
+  //     const response = await p2Api.get("/getscoreboard", {
+  //       params: {
+  //         gameId: localStorage.getItem("gameId"),
+  //       },
+  //     });
+  //     console.log(response.data.players);
+  //     setScoreBoard(response.data.players);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
-  const handleAction = useCallback(
-    async (imageId, e) => {
-      e.preventDefault();
-      try {
-        console.log(imageId);
-        const response = await p2Api.post("/action", {
-          userId: localStorage.getItem("userId"),
-          gameId: localStorage.getItem("gameId"),
-          imageId: imageId,
-        });
-        console.log(response.data);
-        toast.success(`${localStorage.getItem("username")} get 1pt`, {
-          autoClose: 300,
-        });
-        if (response.data.message === "Game ended") {
-          navigate("/scoreboard");
-        } else {
-          fetchPlayerCard();
-          fetchDeckCard();
-          fetchScoreBoard();
-        }
-      } catch (error) {
-        console.log(error);
-        toast.error("Image not matched", { autoClose: 300 });
-      }
-    },
-    [navigate]
-  );
+  // const handleAction = useCallback(
+  //   async (imageId, e) => {
+  //     e.preventDefault();
+  //     try {
+  //       console.log(imageId);
+  //       const response = await p2Api.post("/action", {
+  //         userId: localStorage.getItem("userId"),
+  //         gameId: localStorage.getItem("gameId"),
+  //         imageId: imageId,
+  //       });
+  //       console.log(response.data);
+  //       toast.success(`${localStorage.getItem("username")} get 1pt`, {
+  //         autoClose: 300,
+  //       });
+  //       if (response.data.message === "Game ended") {
+  //         navigate("/scoreboard");
+  //       } else {
+  //         fetchPlayerCard();
+  //         fetchDeckCard();
+  //         fetchScoreBoard();
+  //       }
+  //     } catch (error) {
+  //       console.log(error);
+  //       toast.error("Image not matched", { autoClose: 300 });
+  //     }
+  //   },
+  //   [navigate]
+  // );
+
+  // useEffect(() => {
+  //   fetchPlayerCard();
+  //   fetchDeckCard();
+  //   fetchScoreBoard();
+  // }, [handleAction]);
 
   useEffect(() => {
-    fetchPlayerCard();
-    fetchDeckCard();
-    fetchScoreBoard();
-  }, [handleAction]);
+    socket.emit("joinGameRoom", localStorage.getItem("gameId"));
+
+    const fetchInitialState = async () => {
+      try {
+        const response = await p2Api.get("/getgamestate", {
+          params: {
+            gameId: localStorage.getItem("gameId"),
+            userId: localStorage.getItem("userId"),
+          },
+        });
+        const gameState = response.data;
+        const currentPlayer = gameState.players.find(
+          (p) => p.id === Number(localStorage.getItem("userId"))
+        );
+        setPlayerImages(currentPlayer.playerCards[0]);
+        setDeckImages(gameState.game.deckCards[0]);
+        setScoreBoard(gameState.players);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchInitialState();
+
+    socket.on("actionError", (error) => {
+      if (error.message === "Image not matched") {
+        toast.error("Image not matched", { autoClose: 300 });
+      }
+    });
+
+    socket.on("gameStateUpdate", (gameState) => {
+      const currentPlayer = gameState.players.find(
+        (p) => p.id === Number(localStorage.getItem("userId"))
+      );
+      setPlayerImages(currentPlayer.playerCards[0]);
+      setDeckImages(gameState.game.deckCards[0]);
+      setScoreBoard(gameState.players);
+    });
+
+    socket.on("gameEnded", (finalState) => {
+      navigate("/scoreboard");
+    });
+
+    return () => {
+      socket.off("gameStateUpdate");
+      socket.off("actionError");
+      socket.off("gameEnded");
+    };
+  }, [navigate]);
+
+  const handleAction = useCallback(async (imageId, e) => {
+    e.preventDefault();
+    try {
+      await socket.emit("playerAction", {
+        userId: localStorage.getItem("userId"),
+        gameId: localStorage.getItem("gameId"),
+        imageId: imageId,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
 
   return (
     <Background backgroundImage={playPageBg}>

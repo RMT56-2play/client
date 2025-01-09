@@ -5,6 +5,9 @@ import { useState } from "react";
 
 import { toast } from "react-toastify";
 
+import { io } from "socket.io-client";
+const socket = io("http://localhost:3000");
+
 export default function JoinGame() {
   const [username, setUsername] = useState("");
   const [gameId, setGameId] = useState("");
@@ -22,6 +25,9 @@ export default function JoinGame() {
       localStorage.setItem("gameId", response.data.game.id);
       localStorage.setItem("userId", response.data.user.id);
       localStorage.setItem("username", response.data.user.username);
+
+      socket.emit("joinWaitingRoom", response.data.game.id);
+
       toast.success("Game joined successfully", {
         autoClose: 300,
       });
