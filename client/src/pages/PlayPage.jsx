@@ -1,9 +1,9 @@
-import Background from "../components/Background";
-import playPageBg from "../assets/spot it.png";
 import { useNavigate } from "react-router";
+import playPageBg from "../assets/spot it.png";
+import Background from "../components/Background";
 
-import { p2Api } from "../helpers/http-client";
 import { useCallback, useEffect, useState } from "react";
+import { p2Api } from "../helpers/http-client";
 
 import { toast } from "react-toastify";
 
@@ -221,7 +221,7 @@ export default function PlayPage() {
   const handleAction = useCallback(async (imageId, e) => {
     e.preventDefault();
     try {
-      await socket.emit("playerAction", {
+      socket.emit("playerAction", {
         userId: localStorage.getItem("userId"),
         gameId: localStorage.getItem("gameId"),
         imageId: imageId,

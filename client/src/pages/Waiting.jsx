@@ -1,16 +1,15 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import waitingPageBackground from "../assets/waitingRoom.png";
 import Background from "../components/Background";
-import { useEffect, useState } from "react";
 
-import { p2Api } from "../helpers/http-client";
-import { toast } from "react-toastify";
 
 import { io } from "socket.io-client";
+import { usePlayers } from "../contexts/PlayersContext";
 const socket = io("http://localhost:3000");
 
 export default function Waiting() {
-  const [players, setPlayers] = useState([]);
+  const {players, setPlayers} = usePlayers();
 
   const navigate = useNavigate();
 

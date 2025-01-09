@@ -7,10 +7,12 @@ import Scoreboard from "./pages/ScoreBoard";
 import HowToPlay from "./pages/HowToPlay";
 import PlayPage from "./pages/PlayPage";
 import { ToastContainer } from "react-toastify";
+import { PlayersProvider } from "./contexts/PlayersContext";
 
 function App() {
   return (
     <>
+      <PlayersProvider>
       <BrowserRouter>
         <ToastContainer />
         <Routes>
@@ -22,7 +24,8 @@ function App() {
           <Route path="/scoreboard" element={<Scoreboard />} />
           <Route path="/howtoplay" element={<HowToPlay />} />
         </Routes>
-      </BrowserRouter>
+        </BrowserRouter>
+        </PlayersProvider>
     </>
   );
 }
