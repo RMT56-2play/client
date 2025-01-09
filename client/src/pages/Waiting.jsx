@@ -7,10 +7,13 @@ import { p2Api } from "../helpers/http-client";
 import { toast } from "react-toastify";
 
 import { io } from "socket.io-client";
-const socket = io("http://localhost:3000");
+// const socket = io("http://localhost:3000");
+const socket = io("https://rmt56.juang.site");
+
+import { usePlayers } from "../contexts/player.context";
 
 export default function Waiting() {
-  const [players, setPlayers] = useState([]);
+  // const [players, setPlayers] = useState([]);
 
   const navigate = useNavigate();
 
@@ -49,6 +52,8 @@ export default function Waiting() {
   //   }
   // };
 
+  const { players, updatePlayers } = usePlayers();
+
   useEffect(() => {
     const gameId = localStorage.getItem("gameId");
 
@@ -72,7 +77,8 @@ export default function Waiting() {
     // fetchPlayers();
 
     socket.on("playerListUpdate", (data) => {
-      setPlayers(data.players);
+      // setPlayers(data.players);
+      updatePlayers(data.players);
     });
 
     socket.on("gameStart", (gameState) => {
@@ -83,7 +89,7 @@ export default function Waiting() {
       socket.off("playerListUpdate");
       socket.off("gameStart");
     };
-  }, [navigate]);
+  }, [navigate, 1]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

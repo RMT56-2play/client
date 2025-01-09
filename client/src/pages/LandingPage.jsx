@@ -2,7 +2,8 @@ import { NavLink } from "react-router";
 import Background from "../components/Background";
 
 import { io } from "socket.io-client";
-const socket = io("http://localhost:3000");
+// const socket = io("http://localhost:3000");
+const socket = io("https://rmt56.juang.site");
 
 export default function LandingPage() {
   return (
